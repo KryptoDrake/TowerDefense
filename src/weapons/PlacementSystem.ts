@@ -952,6 +952,12 @@ export class PlacementSystem {
     // Hide placement tooltip when deselecting
     if (!key) this.hidePlacementTooltip();
 
+    // Show/hide mobile cancel button
+    const cancelBtn = document.getElementById('mobile-cancel-btn');
+    if (cancelBtn) {
+      cancelBtn.classList.toggle('visible', key !== null);
+    }
+
     // Remove ghost when deselecting weapon
     if (!key) {
       this.removeGhost();
@@ -995,6 +1001,17 @@ export class PlacementSystem {
   private setupMouseEvents(): void {
     const canvas = document.getElementById('game-canvas')!;
     const self = () => PlacementSystem.instance!;
+
+    // Mobile cancel button (replaces Escape key on touch devices)
+    const cancelBtn = document.getElementById('mobile-cancel-btn');
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        const inst = self();
+        inst.hideSellConfirmation();
+        inst.selectWeapon(null);
+        inst.deselectTower();
+      });
+    }
 
     canvas.addEventListener('mousemove', (e) => {
       const inst = self();
@@ -1327,6 +1344,10 @@ export class PlacementSystem {
     this.selectWeapon(null); // deselect weapon panel FIRST (calls deselectTower internally)
     this.selectedTower = weapon; // THEN set selected tower
 
+    // Show mobile cancel button for tower deselection
+    const cancelBtn = document.getElementById('mobile-cancel-btn');
+    if (cancelBtn) cancelBtn.classList.add('visible');
+
     // Show selection ring
     if (this.selectionRing) {
       this.selectionRing.visible = true;
@@ -1354,6 +1375,12 @@ export class PlacementSystem {
     this.hideRangeIndicator();
     this.removeTargetLine();
     this.towerInfoPanel.classList.remove('visible');
+
+    // Hide mobile cancel button if no weapon selected either
+    if (!this.selectedWeapon) {
+      const cancelBtn = document.getElementById('mobile-cancel-btn');
+      if (cancelBtn) cancelBtn.classList.remove('visible');
+    }
   }
 
   private cycleSelectedTower(): void {

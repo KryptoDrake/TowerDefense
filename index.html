@@ -2,7 +2,10 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <title>Zombie Tower Defense</title>
   <style>
     :root {
@@ -2087,8 +2090,53 @@
       100% { opacity: 1; transform: scale(1); }
     }
 
+    /* ── Mobile Cancel Button ────────────────────── */
+    #mobile-cancel-btn {
+      display: none;
+      position: absolute;
+      top: env(safe-area-inset-top, 10px);
+      right: 60px;
+      z-index: 20;
+      pointer-events: all;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #fff;
+      background: rgba(200, 50, 50, 0.85);
+      border: 2px solid rgba(255, 100, 100, 0.6);
+      border-radius: 8px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    #mobile-cancel-btn.visible {
+      display: block;
+    }
+
     /* ── Mobile / Touch Responsive ──────────────── */
     @media (max-width: 768px) {
+      /* Safe area insets for iPhone notch */
+      #hud-top {
+        padding-top: max(12px, env(safe-area-inset-top));
+        padding-left: max(20px, env(safe-area-inset-left));
+        padding-right: max(20px, env(safe-area-inset-right));
+      }
+
+      #weapon-panel {
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+      }
+
+      #wave-controls {
+        bottom: max(100px, calc(100px + env(safe-area-inset-bottom)));
+      }
+
+      /* Prevent text selection on touch */
+      * {
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
       /* ── Loading Screen ── */
       .ls-title {
         font-size: 28px !important;
@@ -2619,6 +2667,9 @@
   ">&#9881;</button>
 
   <canvas id="game-canvas"></canvas>
+
+  <!-- Mobile cancel button (no Escape key on touch) -->
+  <button id="mobile-cancel-btn">&#10005; Abbrechen</button>
 
   <!-- Game UI (hidden during hub) -->
   <div id="game-ui">
