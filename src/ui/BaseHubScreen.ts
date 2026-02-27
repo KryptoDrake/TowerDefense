@@ -75,9 +75,11 @@ export class BaseHubScreen {
     this.headerBar.style.cssText = `
       position: absolute;
       top: 0; left: 0; width: 100%;
+      max-height: 100%;
+      overflow-y: auto;
       display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;
-      padding: 10px 12px;
-      background: linear-gradient(180deg, rgba(10,10,26,0.9) 0%, rgba(10,10,26,0) 100%);
+      padding: 10px 12px 20px;
+      background: rgba(10,10,26,0.92);
       pointer-events: auto;
       box-sizing: border-box;
     `;
