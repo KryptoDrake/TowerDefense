@@ -94,16 +94,15 @@ export class BaseHubScreen {
     `;
     this.overlay.appendChild(this.panelContainer);
 
-    // Right-side backpack panel (always visible in hub)
+    // Backpack panel (popup, opened via nav button)
     this.backpackPanel = document.createElement('div');
     this.backpackPanel.style.cssText = `
       position: absolute;
-      top: 60px; right: 12px;
-      width: min(280px, 90vw);
-      max-height: calc(100vh - 80px);
-      overflow-y: auto;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
       pointer-events: auto;
       display: none;
+      z-index: 260;
     `;
     this.overlay.appendChild(this.backpackPanel);
   }
@@ -116,8 +115,6 @@ export class BaseHubScreen {
     }
     this.renderHeader();
     this.closePanel();
-    this.renderBackpackSidebar();
-    this.backpackPanel.style.display = 'block';
     this.overlay.style.display = 'block';
 
     // Show pending chest reward
@@ -140,9 +137,12 @@ export class BaseHubScreen {
 
   showPanel(panel: 'merchant' | 'chest' | 'backpack' | 'daily' | 'stats' | 'achievements' | 'save' | 'load' | 'encyclopedia' | 'highscores'): void {
     if (panel === 'backpack') {
-      this.backpackPanel.scrollTop = 0;
+      this.closePanel();
+      this.renderBackpackPanel();
+      this.backpackPanel.style.display = 'block';
       return;
     }
+    this.backpackPanel.style.display = 'none';
     this.activePanel = panel;
     this.renderPanel();
     this.panelContainer.style.display = 'block';
@@ -152,6 +152,7 @@ export class BaseHubScreen {
     this.activePanel = null;
     this.panelContainer.style.display = 'none';
     this.panelContainer.innerHTML = '';
+    this.backpackPanel.style.display = 'none';
   }
 
   startExpedition(): void {
@@ -210,6 +211,10 @@ export class BaseHubScreen {
           padding: 4px 10px; font-size: 11px; color: #ffd700;
           background: rgba(255,215,0,0.08); border: 1px solid #665500; border-radius: 4px; cursor: pointer;
         " title="Bestenliste">&#127942; Bestenliste</button>
+        <button class="hub-nav-btn" data-panel="backpack" style="
+          padding: 4px 10px; font-size: 11px; color: #44aaff;
+          background: rgba(68,170,255,0.1); border: 1px solid #335577; border-radius: 4px; cursor: pointer;
+        " title="Rucksack">\u{1F392} Rucksack</button>
       </div>
       <button id="hub-reset-btn" style="
         padding: 3px 10px; font-size: 10px; color: #666;
@@ -231,7 +236,7 @@ export class BaseHubScreen {
         this.backpackManager.fullReset();
         this.backpackManager.autoFillBackpack();
         this.renderHeader();
-        this.renderBackpackSidebar();
+        this.renderBackpackPanel();
         if (this.activePanel) this.renderPanel();
       });
     }
@@ -556,8 +561,8 @@ export class BaseHubScreen {
     return html;
   }
 
-  // ─── Right-Side Backpack Panel ─────────────────
-  private renderBackpackSidebar(): void {
+  // ─── Backpack Panel (Popup) ─────────────────────
+  private renderBackpackPanel(): void {
     const equipped = this.backpackManager.getEquipped();
     const maxSlots = this.backpackManager.getMaxSlots();
     const stats = this.backpackManager.getStats();
@@ -571,13 +576,24 @@ export class BaseHubScreen {
         background: rgba(10,10,26,0.92);
         border: 2px solid rgba(68,170,255,0.4);
         border-radius: 16px;
-        padding: 16px;
-        box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        padding: 20px;
+        min-width: min(400px, 92vw);
+        max-width: min(400px, 92vw);
+        max-height: 70vh;
+        overflow-y: auto;
+        box-shadow: 0 0 40px rgba(0,0,0,0.6);
         backdrop-filter: blur(8px);
       ">
-        <h3 style="color: #44aaff; font-size: 16px; margin: 0 0 10px 0;">
-          \u{1F392} Rucksack
-        </h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <h3 style="color: #44aaff; font-size: 20px; margin: 0;">
+            \u{1F392} Rucksack
+          </h3>
+          <button class="bp-close-btn" style="
+            background: none; border: 1px solid #555; color: #888;
+            border-radius: 50%; width: 28px; height: 28px; font-size: 16px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+          ">\u2715</button>
+        </div>
 
         <!-- Slot Progress -->
         <div style="margin-bottom: 12px;">
@@ -710,6 +726,14 @@ export class BaseHubScreen {
 
     this.backpackPanel.innerHTML = html;
     this.attachBackpackHandlers();
+
+    // Close button handler
+    const closeBtn = this.backpackPanel.querySelector('.bp-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        this.backpackPanel.style.display = 'none';
+      });
+    }
   }
 
   private renderWeaponDetail(weapon: WeaponKey): string {
@@ -1012,7 +1036,7 @@ export class BaseHubScreen {
       closeBtn.addEventListener('click', () => {
         popup.remove();
         this.renderHeader();
-        this.renderBackpackSidebar();
+        this.renderBackpackPanel();
       });
     }
   }
@@ -1032,7 +1056,7 @@ export class BaseHubScreen {
         if (this.backpackManager.canBuySlotUpgrade()) {
           this.backpackManager.buySlotUpgrade();
           this.renderHeader();
-          this.renderBackpackSidebar();
+          this.renderBackpackPanel();
           this.renderPanel();
         }
       });
@@ -1045,7 +1069,7 @@ export class BaseHubScreen {
         if (this.backpackManager.canBuy(weapon)) {
           this.backpackManager.buyWeapon(weapon);
           this.renderHeader();
-          this.renderBackpackSidebar();
+          this.renderBackpackPanel();
           this.renderPanel();
         }
       });
@@ -1057,7 +1081,7 @@ export class BaseHubScreen {
         const id = (item as HTMLElement).dataset.upgradeId;
         if (id && this.backpackManager.buyPermanentUpgrade(id)) {
           this.renderHeader();
-          this.renderBackpackSidebar();
+          this.renderBackpackPanel();
           this.renderPanel();
         }
       });
@@ -1073,7 +1097,7 @@ export class BaseHubScreen {
           this.backpackManager.equipWeapon(weapon);
         }
         this.renderHeader();
-        this.renderBackpackSidebar();
+        this.renderBackpackPanel();
         this.renderPanel();
       });
     });
@@ -1086,7 +1110,7 @@ export class BaseHubScreen {
         const weapon = (slot as HTMLElement).dataset.weapon as WeaponKey;
         this.backpackManager.unequipWeapon(weapon);
         this.renderHeader();
-        this.renderBackpackSidebar();
+        this.renderBackpackPanel();
         if (this.activePanel) this.renderPanel();
       });
     });
