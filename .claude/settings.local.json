@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite build)",
+      "Bash(curl:*)",
+      "Bash(npx vite:*)",
+      "Bash(wc:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}
